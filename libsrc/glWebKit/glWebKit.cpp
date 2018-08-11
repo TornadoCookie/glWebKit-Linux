@@ -102,7 +102,7 @@ bool initWebkit()
 #else
    HMODULE wdll = LoadLibraryA("EAWebkit.dll");
 #endif // _DEBUG
-   if(wdll != nullptr)
+   if (wdll != nullptr)
    {
       create_Webkit_instance = reinterpret_cast<PF_CreateEAWebkitInstance>(GetProcAddress(wdll, "CreateEAWebkitInstance"));
    }
@@ -111,7 +111,7 @@ bool initWebkit()
    WSADATA wsadata = {};
    WSAStartup(MAKEWORD(2, 0), &wsadata);
 
-   if(!create_Webkit_instance)
+   if (!create_Webkit_instance)
    {
       std::cout << "EAWebkit.dll missing" << std::endl;
       return false;
@@ -121,7 +121,7 @@ bool initWebkit()
 
    //check that dll is same version as our headers
    const char* verStr = wk->GetVersion();
-   if(strcmp(verStr, EAWEBKIT_VERSION_S) != 0)
+   if (strcmp(verStr, EAWEBKIT_VERSION_S) != 0)
    {
       std::cout << "Error!  Mismatched versions of EA Webkit" << std::endl;
       return false;
