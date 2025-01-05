@@ -1,9 +1,10 @@
 #include "glUtil.h"
 
 #include <GL/glew.h>
-#include <gl/GLU.h>
+//#include <GL/GLU.h>
 
 #include <iostream>
+#include <cstring>
 
 #pragma region helpers
 void checkOpenGLError(const std::string& name)

@@ -31,12 +31,12 @@ $(BUILDDIR)/libglWebKit.so: $(glWebKit_OBJECTS)
 $(BUILDDIR)/libsrc/glWebKit/%.o: libsrc/glWebKit/%.cpp
 	g++ -c $^ -o $@ -fPIC $(CFLAGS)
 
-example_OBJECTS+=$(BUILDDIR)/libsrc/example/glUtil.cxx
-example_OBJECTS+=$(BUILDDIR)/libsrc/example/main.cxx
+example_OBJECTS+=$(BUILDDIR)/libsrc/example/glUtil.o
+example_OBJECTS+=$(BUILDDIR)/libsrc/example/main.o
 
 $(BUILDDIR)/example: $(example_OBJECTS)
-	gcc $^ -o $@ -shared -lglWebKit -L$(BUILDDIR) -W,rpath=$(BUILDDIR)
+	gcc $^ -o $@  -lglWebKit -L$(BUILDDIR) -Wl,-rpath,$(BUILDDIR) -lSDL2 -lm -lstdc++ -lGLEW -lGL -Lbin64 -lEAWebKitd -Wl,-rpath,bin64 -lX11
 
 $(BUILDDIR)/libsrc/example/%.o: libsrc/example/%.cxx
-	g++ -c $^ -o $@ -fPIC $(CFLAGS)
+	g++ -c $^ -o $@ $(CFLAGS)
 

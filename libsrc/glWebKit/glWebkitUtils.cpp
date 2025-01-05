@@ -16,6 +16,8 @@
 #if defined(GLWEBKIT_PLATFORM_WINDOWS)
 #include <windows.h> // LoadLibraryA
 #elif defined(GLWEBKIT_PLATFORM_LINUX)
+#include <X11/Xlib.h>
+#include <climits>
 #define index _index // avoid name collision with deprecated POSIX func
 #endif
 
@@ -97,6 +99,23 @@ int getSystemFonts(std::vector<std::string>& fonts)
 #elif defined(GLWEBKIT_PLATFORM_LINUX)
 
 // use XListFonts perhaps?
+
+int getSystemFonts(std::vector<std::string>& fonts) 
+{
+    Display *dpy = XOpenDisplay(NULL);
+
+    int fontCount = 0;
+    char **fontList = XListFonts(dpy, "*", INT_MAX, &fontCount);
+
+    for (int i = 0; i < fontCount; i++)
+    {
+        fonts.push_back(std::string(fontList[i]));
+    }
+
+    XCloseDisplay(dpy);
+
+    return 0;
+}
 
 #endif
 
