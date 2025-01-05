@@ -13,7 +13,12 @@
 
 #include <stdio.h>
 
+#if defined(GLWEBKIT_PLATFORM_WINDOWS)
 #include <windows.h> // LoadLibraryA
+#elif defined(GLWEBKIT_PLATFORM_LINUX)
+#define index _index // avoid name collision with deprecated POSIX func
+#endif
+
 #include <assert.h>
 #include <array>
 
@@ -22,6 +27,7 @@
 #include <iostream>
 #include <algorithm>
 
+#if defined(GLWEBKIT_PLATFORM_WINDOWS)
 int getSystemFonts(std::vector<std::string>& fonts) 
 {
     static const LPWSTR fontRegistryPath = L"Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts";
@@ -88,12 +94,24 @@ int getSystemFonts(std::vector<std::string>& fonts)
     return 0;
 }
 
+#elif defined(GLWEBKIT_PLATFORM_LINUX)
+
+// use XListFonts perhaps?
+
+#endif
+
 int add_ttf_font(EA::WebKit::EAWebKitLib* wk, const char* ttfFile) 
 {
     EA::WebKit::ITextSystem* ts = wk->GetTextSystem();
 
     FILE* f = 0;
+
+#if defined(GLWEBKIT_PLATFORM_WINDOWS)
     fopen_s(&f, ttfFile, "rb");
+#else // safe bet
+    f = fopen(ttfFile, "rb");
+#endif
+    
     if (!f) return 1;
     fseek(f, 0L, SEEK_END);
     size_t fileSize = ftell(f);

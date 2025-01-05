@@ -3,7 +3,7 @@
 #if defined(_WIN32)
     #define GLWEBKIT_PLATFORM_WINDOWS
 #elif defined(__linux__)
-    #define GLWEBKIT_PLATFORM_LINUX // also assumes glibc
+    #define GLWEBKIT_PLATFORM_LINUX // also assumes glibc and x11
 #else
     #error "Unknown Platform: you will have issues"
 #endif
