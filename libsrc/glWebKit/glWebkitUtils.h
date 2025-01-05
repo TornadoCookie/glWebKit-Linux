@@ -1,5 +1,13 @@
 #pragma once
 
+#if defined(_WIN32)
+    #define GLWEBKIT_PLATFORM_WINDOWS
+#elif defined(__linux__)
+    #define GLWEBKIT_PLATFORM_LINUX // also assumes glibc
+#else
+    #error "Unknown Platform: you will have issues"
+#endif
+
 #include <string>
 #include <vector>
 #include <EAWebKit/EAWebKit.h>

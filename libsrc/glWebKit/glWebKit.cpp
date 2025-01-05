@@ -7,13 +7,23 @@
 
 #include <EAWebKit/EAWebKit>
 
+#if defined(GLWEBKIT_PLATFORM_WINDOWS)
 #include <windows.h>
 #include <bcrypt.h>
+#elif defined(GLWEBKIT_PLATFORM_LINUX)
+#include <time.h>
+#include <stdlib.h>
+#include <pthread.h>
+#endif
 
 #include <list>
 #include <iostream>
 
 EA::WebKit::EAWebKitLib* wk = nullptr;
+
+typedef EA::WebKit::EAWebKitLib* (*PF_CreateEAWebkitInstance)(void);
+
+#if defined(GLWEBKIT_PLATFORM_WINDOWS)
 
 // Callbacks
 double timerCallback() 
@@ -66,6 +76,79 @@ void* stackBaseCallback()
    return reinterpret_cast<void*>(pTib->StackBase);
 }
 
+PF_CreateEAWebkitInstance get_CreateEAWebKitInstance()
+{
+#ifdef _DEBUG
+   HMODULE wdll = LoadLibraryA("EAWebkitd.dll");
+#else
+   HMODULE wdll = LoadLibraryA("EAWebkit.dll");
+#endif // _DEBUG
+   if(wdll != nullptr)
+   {
+      return reinterpret_cast<PF_CreateEAWebkitInstance>(GetProcAddress(wdll, "CreateEAWebkitInstance"));
+   }
+
+   return nullptr;
+}
+
+#elif defined(GLWEBKIT_PLATFORM_LINUX)
+
+// Callbacks
+double timerCallback()
+{
+    struct timespec ts;
+
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+
+    double t = (double)ts.tv_sec + ((double)ts.tv_nsec) / 1000000000;
+
+    return t;
+}
+
+double monotonicTimerCallback()
+{
+    return timerCallback();
+}
+
+bool cryptographicallyRandomValueCallback(unsigned char *buffer, size_t length)
+{
+    // use /dev/random because it is more secure
+    FILE *f = fopen("/dev/random", "rb");
+
+    if (!f) return false;
+
+    if (fread(buffer, 1, length, f) != length) return false;
+
+    fclose(f);
+
+    return true;
+}
+
+void *stackBaseCallback()
+{
+    // TODO this is a glibc-exclusive approach
+    // it is also slower than win32 as pthread_getattr_np() parses /proc/<pid>/maps
+
+    pthread_attr_t attr;
+    void *result;
+    size_t stacksize;
+
+    pthread_getattr_np(pthread_self(), &attr);
+    
+    pthread_attr_getstack(&attr, &result, &stacksize);
+
+    pthread_attr_destroy(&attr);
+
+    return result;
+}
+
+PF_CreateEAWebkitInstance get_CreateEAWebKitInstance()
+{
+    return CreateEAWebkitInstance;
+}
+
+#endif
+
 void getCookiesCallback(const char16_t* pUrl, EA::WebKit::EASTLFixedString16Wrapper& result, uint32_t flags)
 {
    std::cout << __FUNCTION__ << std::endl;
@@ -94,22 +177,13 @@ bool initWebkit()
    systems.mThreadSystem = new StdThreadSystem;
    systems.mEAWebkitClient = new GLWebkitClient();
 
-   typedef EA::WebKit::EAWebKitLib* (*PF_CreateEAWebkitInstance)(void);
-   PF_CreateEAWebkitInstance create_Webkit_instance = nullptr;
+   PF_CreateEAWebkitInstance create_Webkit_instance = get_CreateEAWebKitInstance();
 
-#ifdef _DEBUG
-   HMODULE wdll = LoadLibraryA("EAWebkitd.dll");
-#else
-   HMODULE wdll = LoadLibraryA("EAWebkit.dll");
-#endif // _DEBUG
-   if (wdll != nullptr)
-   {
-      create_Webkit_instance = reinterpret_cast<PF_CreateEAWebkitInstance>(GetProcAddress(wdll, "CreateEAWebkitInstance"));
-   }
-
+#if defined(GLWEBKIT_PLATFORM_WINDOWS)
    // init winsock manually, this is required
    WSADATA wsadata = {};
    WSAStartup(MAKEWORD(2, 0), &wsadata);
+#endif
 
    if (!create_Webkit_instance)
    {
@@ -240,9 +314,14 @@ void mousewheel(EA::WebKit::View* v, int x, int y, int keys, int delta)
     e.mY = y;
     e.mZDelta = delta;
 
+#if defined(GLWEBKIT_PLATFORM_WINDOWS)
     UINT scrollLines = 1;
     SystemParametersInfoA(SPI_GETWHEELSCROLLLINES, 0, &scrollLines, 0);
     e.mNumLines = ((delta * (int32_t)scrollLines) / (int32_t)WHEEL_DELTA);
+#elif defined(GLWEBKIT_PLATFORM_LINUX)
+    e.mNumLines = delta;
+#endif
+
     v->OnMouseWheelEvent(e);
 }
 
