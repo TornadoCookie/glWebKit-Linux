@@ -1,7 +1,13 @@
 
 #include "glWebkitThreading.h"
 #include <sstream>
+
+#if defined(GLWEBKIT_PLATFORM_WINDOWS)
 #include <windows.h> // Sleep
+#elif defined(GLWEBKIT_PLATFORM_LINUX)
+#include <unistd.h> // usleep
+#define Sleep(x) (usleep(x*1000000))
+#endif
 
 StdMutex::StdMutex()
 {
