@@ -9,7 +9,7 @@
 #include <EAWebKit/EAWebKitFileSystem.h>
 #include <EAWebKit/EAWebKitClient.h>
 #include <EAWebKit/EAWebKitView.h>
-#include "EAWebkit/EAWebKitTextInterface.h"
+#include "EAWebKit/EAWebKitTextInterface.h"
 
 #include <stdio.h>
 
