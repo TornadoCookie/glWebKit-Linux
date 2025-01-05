@@ -1,30 +1,9 @@
-/*
-Copyright (C) 2002-2015 Electronic Arts, Inc.  All rights reserved.
+/*-----------------------------------------------------------------------------
+ * eahave.h
+ *
+ * Copyright (c) Electronic Arts Inc. All rights reserved.
+ *---------------------------------------------------------------------------*/
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-1.  Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-2.  Redistributions in binary form must reproduce the above copyright
-notice, this list of conditions and the following disclaimer in the
-documentation and/or other materials provided with the distribution.
-3.  Neither the name of Electronic Arts, Inc. ("EA") nor the names of
-its contributors may be used to endorse or promote products derived
-from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY ELECTRONIC ARTS AND ITS CONTRIBUTORS "AS IS" AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL ELECTRONIC ARTS OR ITS CONTRIBUTORS BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
 
 /*-----------------------------------------------------------------------------
 	This file's functionality is preliminary and won't be considered stable until 
@@ -90,8 +69,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		- EA_HAVE_XXX_IMPL - Have function implementation information. 
 		  Identifies if a given function implementation is provided by
 		  the current compile and link configuration. For example, it's
-		  commonly the case that console platforms (e.g. Playstation)
-		  declare a getenv function but don't provide a linkable implementation.
+		  commonly the case that console platforms declare a getenv function 
+		  but don't provide a linkable implementation.
 		  In this case the user needs to provide such a function manually
 		  as part of the link. If the implementation is available then
 		  we define EA_HAVE_GETENV_IMPL, otherwise it remains undefined.
@@ -147,7 +126,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		EA_RESTORE_ALL_VC_WARNINGS()
 	#endif
 
-	#if defined(__cplusplus) && defined(_YVALS) /* If using the Dinkumware Standard library... */
+	#if defined(__cplusplus) && defined(_CPPLIB_VER) /* If using the Dinkumware Standard library... */
 		#define EA_HAVE_DINKUMWARE_CPP_LIBRARY 1
 	#else
 		#define EA_NO_HAVE_DINKUMWARE_CPP_LIBRARY 1
@@ -165,11 +144,11 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Clang libc++
 #if !defined(EA_HAVE_LIBCPP_LIBRARY) && !defined(EA_NO_HAVE_LIBCPP_LIBRARY)
-	#if defined(__clang__)
-		#if defined(__cplusplus) && __has_include(<__config>)
+	#if EA_HAS_INCLUDE_AVAILABLE
+		#if EA_HAS_INCLUDE(<__config>)
 			#define EA_HAVE_LIBCPP_LIBRARY 1 // We could also #include <ciso646> and check if defined(_LIBCPP_VERSION).
 		#endif
-	#endif 
+	#endif
 
 	#if !defined(EA_HAVE_LIBCPP_LIBRARY) 
 		#define EA_NO_HAVE_LIBCPP_LIBRARY 1
@@ -205,12 +184,16 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <unistd.h>
 #if !defined(EA_HAVE_UNISTD_H) && !defined(EA_NO_HAVE_UNISTD_H)
+	#if defined(EA_PLATFORM_UNIX)
+		#define EA_HAVE_UNISTD_H 1
+	#else
 		#define EA_NO_HAVE_UNISTD_H 1
+	#endif
 #endif
 
 // #include <sys/time.h>
 #if !defined(EA_HAVE_SYS_TIME_H) && !defined(EA_NO_HAVE_SYS_TIME_H)
-	#if !defined(EA_PLATFORM_MICROSOFT) && !defined(CS_UNDEFINED_STRING) && !defined(_YVALS) /* Yvals indicates Dinkumware. */
+	#if !defined(EA_PLATFORM_MICROSOFT) && !defined(_CPPLIB_VER) /* _CPPLIB_VER indicates Dinkumware. */
 		#define EA_HAVE_SYS_TIME_H 1 /* defines struct timeval */
 	#else
 		#define EA_NO_HAVE_SYS_TIME_H 1
@@ -219,12 +202,20 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <ptrace.h>
 #if !defined(EA_HAVE_SYS_PTRACE_H) && !defined(EA_NO_HAVE_SYS_PTRACE_H)
+	#if defined(EA_PLATFORM_UNIX) && !defined(__CYGWIN__) && (defined(EA_PLATFORM_DESKTOP) || defined(EA_PLATFORM_SERVER))
+		#define EA_HAVE_SYS_PTRACE_H 1 /* declares the ptrace function */
+	#else
 		#define EA_NO_HAVE_SYS_PTRACE_H 1
+	#endif
 #endif
 
 // #include <sys/stat.h>
 #if !defined(EA_HAVE_SYS_STAT_H) && !defined(EA_NO_HAVE_SYS_STAT_H)
+	#if (defined(EA_PLATFORM_UNIX) && !(defined(EA_PLATFORM_SONY) && defined(EA_PLATFORM_CONSOLE))) || defined(__APPLE__) || defined(EA_PLATFORM_ANDROID)
+		#define EA_HAVE_SYS_STAT_H 1 /* declares the stat struct and function */
+	#else
 		#define EA_NO_HAVE_SYS_STAT_H 1
+	#endif
 #endif
 
 // #include <locale.h>
@@ -234,7 +225,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <signal.h>
 #if !defined(EA_HAVE_SIGNAL_H) && !defined(EA_NO_HAVE_SIGNAL_H)
-	#if !defined(EA_PLATFORM_BSD) && !defined(EA_PLATFORM_SONY)
+	#if !defined(EA_PLATFORM_BSD) && !defined(EA_PLATFORM_SONY) && !defined(EA_PLATFORM_NX)
 		#define EA_HAVE_SIGNAL_H 1
 	#else
 		#define EA_NO_HAVE_SIGNAL_H 1
@@ -243,7 +234,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <sys/signal.h>
 #if !defined(EA_HAVE_SYS_SIGNAL_H) && !defined(EA_NO_HAVE_SYS_SIGNAL_H)
-	#if defined(EA_PLATFORM_BSD) || defined(EA_PLATFORM_KETTLE)
+	#if defined(EA_PLATFORM_BSD) || defined(EA_PLATFORM_SONY)
 		#define EA_HAVE_SYS_SIGNAL_H 1
 	#else
 		#define EA_NO_HAVE_SYS_SIGNAL_H 1
@@ -252,7 +243,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <pthread.h>
 #if !defined(EA_HAVE_PTHREAD_H) && !defined(EA_NO_HAVE_PTHREAD_H)
-	#if defined(CS_UNDEFINED_STRING) || defined(EA_PLATFORM_APPLE) || defined(EA_PLATFORM_POSIX) || defined(CS_UNDEFINED_STRING)
+	#if defined(EA_PLATFORM_UNIX) || defined(EA_PLATFORM_APPLE) || defined(EA_PLATFORM_POSIX)
 		#define EA_HAVE_PTHREAD_H 1 /* It can be had under Microsoft/Windows with the http://sourceware.org/pthreads-win32/ library */
 	#else
 		#define EA_NO_HAVE_PTHREAD_H 1
@@ -261,7 +252,11 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <wchar.h>
 #if !defined(EA_HAVE_WCHAR_H) && !defined(EA_NO_HAVE_WCHAR_H)
+	#if defined(EA_PLATFORM_DESKTOP) && defined(EA_PLATFORM_UNIX) && defined(EA_PLATFORM_SONY) && defined(EA_PLATFORM_APPLE)
+		#define EA_HAVE_WCHAR_H 1
+	#else
 		#define EA_NO_HAVE_WCHAR_H 1
+	#endif
 #endif
 
 // #include <malloc.h>
@@ -275,7 +270,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <alloca.h>
 #if !defined(EA_HAVE_ALLOCA_H) && !defined(EA_NO_HAVE_ALLOCA_H)
-	#if !defined(EA_HAVE_MALLOC_H) && !defined(EA_PLATFORM_KETTLE)
+	#if !defined(EA_HAVE_MALLOC_H) && !defined(EA_PLATFORM_SONY)
 		#define EA_HAVE_ALLOCA_H 1
 	#else
 		#define EA_NO_HAVE_ALLOCA_H 1
@@ -284,22 +279,34 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <execinfo.h>
 #if !defined(EA_HAVE_EXECINFO_H) && !defined(EA_NO_HAVE_EXECINFO_H)
+	#if (defined(EA_PLATFORM_LINUX) || defined(EA_PLATFORM_OSX)) && !defined(EA_PLATFORM_ANDROID)
+		#define EA_HAVE_EXECINFO_H 1
+	#else
 		#define EA_NO_HAVE_EXECINFO_H 1
+	#endif
 #endif
 
 // #include <semaphore.h> (Unix semaphore support)
 #if !defined(EA_HAVE_SEMAPHORE_H) && !defined(EA_NO_HAVE_SEMAPHORE_H)
+	#if defined(EA_PLATFORM_UNIX)
+		#define EA_HAVE_SEMAPHORE_H 1
+	#else
 		#define EA_NO_HAVE_SEMAPHORE_H 1
+	#endif
 #endif
 
 // #include <dirent.h> (Unix semaphore support)
 #if !defined(EA_HAVE_DIRENT_H) && !defined(EA_NO_HAVE_DIRENT_H)
+	#if defined(EA_PLATFORM_UNIX) && !defined(EA_PLATFORM_CONSOLE)
+		#define EA_HAVE_DIRENT_H 1
+	#else
 		#define EA_NO_HAVE_DIRENT_H 1
+	#endif
 #endif
 
 // #include <array>, <forward_list>, <ununordered_set>, <unordered_map>
 #if !defined(EA_HAVE_CPP11_CONTAINERS) && !defined(EA_NO_HAVE_CPP11_CONTAINERS)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !defined(CS_UNDEFINED_STRING) // Dinkumware. VS2010+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) // Dinkumware. VS2010+
 		#define EA_HAVE_CPP11_CONTAINERS 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4004) // Actually GCC 4.3 supports array and unordered_
 		#define EA_HAVE_CPP11_CONTAINERS 1
@@ -312,7 +319,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <atomic>
 #if !defined(EA_HAVE_CPP11_ATOMIC) && !defined(EA_NO_HAVE_CPP11_ATOMIC)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) && !defined(CS_UNDEFINED_STRING) // Dinkumware. VS2012+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) // Dinkumware. VS2012+
 		#define EA_HAVE_CPP11_ATOMIC 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4007)
 		#define EA_HAVE_CPP11_ATOMIC 1
@@ -325,7 +332,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <condition_variable>
 #if !defined(EA_HAVE_CPP11_CONDITION_VARIABLE) && !defined(EA_NO_HAVE_CPP11_CONDITION_VARIABLE)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) && !defined(CS_UNDEFINED_STRING) // Dinkumware. VS2012+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) // Dinkumware. VS2012+
 		#define EA_HAVE_CPP11_CONDITION_VARIABLE 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4007)
 		#define EA_HAVE_CPP11_CONDITION_VARIABLE 1
@@ -338,7 +345,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <mutex>
 #if !defined(EA_HAVE_CPP11_MUTEX) && !defined(EA_NO_HAVE_CPP11_MUTEX)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) && !defined(CS_UNDEFINED_STRING) // Dinkumware. VS2012+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) // Dinkumware. VS2012+
 		#define EA_HAVE_CPP11_MUTEX 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4007)
 		#define EA_HAVE_CPP11_MUTEX 1
@@ -351,7 +358,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <thread>
 #if !defined(EA_HAVE_CPP11_THREAD) && !defined(EA_NO_HAVE_CPP11_THREAD)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) && !defined(CS_UNDEFINED_STRING) // Dinkumware. VS2012+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) // Dinkumware. VS2012+
 		#define EA_HAVE_CPP11_THREAD 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4007)
 		#define EA_HAVE_CPP11_THREAD 1
@@ -364,7 +371,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <future>
 #if !defined(EA_HAVE_CPP11_FUTURE) && !defined(EA_NO_HAVE_CPP11_FUTURE)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) && !defined(CS_UNDEFINED_STRING) // Dinkumware. VS2012+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) // Dinkumware. VS2012+
 		#define EA_HAVE_CPP11_FUTURE 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4005)
 		#define EA_HAVE_CPP11_FUTURE 1
@@ -378,7 +385,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <type_traits>
 #if !defined(EA_HAVE_CPP11_TYPE_TRAITS) && !defined(EA_NO_HAVE_CPP11_TYPE_TRAITS)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) && !defined(CS_UNDEFINED_STRING) // Dinkumware. VS2012+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) // Dinkumware. VS2012+
 		#define EA_HAVE_CPP11_TYPE_TRAITS 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4007) // Prior versions of libstdc++ have incomplete support for C++11 type traits.
 		#define EA_HAVE_CPP11_TYPE_TRAITS 1
@@ -391,7 +398,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <tuple>
 #if !defined(EA_HAVE_CPP11_TUPLES) && !defined(EA_NO_HAVE_CPP11_TUPLES)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !defined(CS_UNDEFINED_STRING) // Dinkumware. VS2010+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) // Dinkumware. VS2010+
 		#define EA_HAVE_CPP11_TUPLES 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4003)
 		#define EA_HAVE_CPP11_TUPLES 1
@@ -404,7 +411,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <regex>
 #if !defined(EA_HAVE_CPP11_REGEX) && !defined(EA_NO_HAVE_CPP11_REGEX)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) && !defined(CS_UNDEFINED_STRING) && (defined(_HAS_EXCEPTIONS) && _HAS_EXCEPTIONS) // Dinkumware. VS2012+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) && (defined(_HAS_EXCEPTIONS) && _HAS_EXCEPTIONS) // Dinkumware. VS2012+
 		#define EA_HAVE_CPP11_REGEX 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4003)
 		#define EA_HAVE_CPP11_REGEX 1
@@ -417,7 +424,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <random>
 #if !defined(EA_HAVE_CPP11_RANDOM) && !defined(EA_NO_HAVE_CPP11_RANDOM)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !defined(CS_UNDEFINED_STRING) // Dinkumware. VS2010+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) // Dinkumware. VS2010+
 		#define EA_HAVE_CPP11_RANDOM 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4005)
 		#define EA_HAVE_CPP11_RANDOM 1
@@ -430,7 +437,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <chrono> 
 #if !defined(EA_HAVE_CPP11_CHRONO) && !defined(EA_NO_HAVE_CPP11_CHRONO)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) && !defined(CS_UNDEFINED_STRING) // Dinkumware. VS2012+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) // Dinkumware. VS2012+
 		#define EA_HAVE_CPP11_CHRONO 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4007) // chrono was broken in glibc prior to 4.7.
 		#define EA_HAVE_CPP11_CHRONO 1
@@ -443,7 +450,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <scoped_allocator> 
 #if !defined(EA_HAVE_CPP11_SCOPED_ALLOCATOR) && !defined(EA_NO_HAVE_CPP11_SCOPED_ALLOCATOR)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) && !defined(CS_UNDEFINED_STRING) // Dinkumware. VS2012+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 540) // Dinkumware. VS2012+
 		#define EA_HAVE_CPP11_SCOPED_ALLOCATOR 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4007)
 		#define EA_HAVE_CPP11_SCOPED_ALLOCATOR 1
@@ -456,9 +463,11 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <initializer_list> 
 #if !defined(EA_HAVE_CPP11_INITIALIZER_LIST) && !defined(EA_NO_HAVE_CPP11_INITIALIZER_LIST)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !defined(EA_COMPILER_NO_INITIALIZER_LISTS) && !defined(CS_UNDEFINED_STRING) // Dinkumware. VS2010+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !defined(EA_COMPILER_NO_INITIALIZER_LISTS) // Dinkumware. VS2010+
 		#define EA_HAVE_CPP11_INITIALIZER_LIST 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_CLANG) && (EA_COMPILER_VERSION >= 301) && !defined(EA_COMPILER_NO_INITIALIZER_LISTS) && !defined(EA_PLATFORM_APPLE)
+		#define EA_HAVE_CPP11_INITIALIZER_LIST 1
+	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBCPP_LIBRARY) && defined(EA_COMPILER_CLANG) && (EA_COMPILER_VERSION >= 301) && !defined(EA_COMPILER_NO_INITIALIZER_LISTS) && !defined(EA_PLATFORM_APPLE)
 		#define EA_HAVE_CPP11_INITIALIZER_LIST 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4004) && !defined(EA_COMPILER_NO_INITIALIZER_LISTS) && !defined(EA_PLATFORM_APPLE)
 		#define EA_HAVE_CPP11_INITIALIZER_LIST 1
@@ -471,7 +480,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <system_error> 
 #if !defined(EA_HAVE_CPP11_SYSTEM_ERROR) && !defined(EA_NO_HAVE_CPP11_SYSTEM_ERROR)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !defined(CS_UNDEFINED_STRING) && !(defined(_HAS_CPP0X) || _HAS_CPP0X) // Dinkumware. VS2010+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !(defined(_HAS_CPP0X) && _HAS_CPP0X) // Dinkumware. VS2010+
 		#define EA_HAVE_CPP11_SYSTEM_ERROR 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_CLANG) && (EA_COMPILER_VERSION >= 301) && !defined(EA_PLATFORM_APPLE)
 		#define EA_HAVE_CPP11_SYSTEM_ERROR 1
@@ -486,7 +495,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <codecvt> 
 #if !defined(EA_HAVE_CPP11_CODECVT) && !defined(EA_NO_HAVE_CPP11_CODECVT)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !defined(CS_UNDEFINED_STRING) // Dinkumware. VS2010+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) // Dinkumware. VS2010+
 		#define EA_HAVE_CPP11_CODECVT 1
 	// Future versions of libc++ may support this header.  However, at the moment there isn't
 	// a reliable way of detecting if this header is available.
@@ -501,7 +510,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // #include <typeindex> 
 #if !defined(EA_HAVE_CPP11_TYPEINDEX) && !defined(EA_NO_HAVE_CPP11_TYPEINDEX)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !defined(CS_UNDEFINED_STRING) // Dinkumware. VS2010+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) // Dinkumware. VS2010+
 		#define EA_HAVE_CPP11_TYPEINDEX 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4006)
 		#define EA_HAVE_CPP11_TYPEINDEX 1
@@ -518,7 +527,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* EA_HAVE_XXX_DECL */
 
 #if !defined(EA_HAVE_mkstemps_DECL) && !defined(EA_NO_HAVE_mkstemps_DECL)
-	#if defined(EA_PLATFORM_APPLE) || defined(CS_UNDEFINED_STRING)
+	#if defined(EA_PLATFORM_APPLE) || defined(EA_PLATFORM_SUN)
 		#define EA_HAVE_mkstemps_DECL 1
 	#else
 		#define EA_NO_HAVE_mkstemps_DECL 1
@@ -534,7 +543,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if !defined(EA_HAVE_strcasecmp_DECL) && !defined(EA_NO_HAVE_strcasecmp_DECL)
-	#if !defined(EA_PLATFORM_MICROSOFT) && !defined(CS_UNDEFINED_STRING)
+	#if !defined(EA_PLATFORM_MICROSOFT)
 		#define EA_HAVE_strcasecmp_DECL  1     /* This is found as stricmp when not found as strcasecmp */
 		#define EA_HAVE_strncasecmp_DECL 1
 	#else
@@ -556,18 +565,21 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if !defined(EA_HAVE_ISNAN) && !defined(EA_NO_HAVE_ISNAN)
-	#if defined(EA_PLATFORM_MICROSOFT)
+	#if defined(EA_PLATFORM_MICROSOFT) && !defined(EA_PLATFORM_MINGW)
 		#define EA_HAVE_ISNAN(x)  _isnan(x)          /* declared in <math.h> */
 		#define EA_HAVE_ISINF(x)  !_finite(x)
 	#elif defined(EA_PLATFORM_APPLE)
 		#define EA_HAVE_ISNAN(x)  std::isnan(x)      /* declared in <cmath> */
 		#define EA_HAVE_ISINF(x)  std::isinf(x)
+	#elif defined(EA_PLATFORM_ANDROID)
+		#define EA_HAVE_ISNAN(x)  __builtin_isnan(x) /* There are a number of standard libraries for Android and it's hard to tell them apart, so just go with builtins */
+		#define EA_HAVE_ISINF(x)  __builtin_isinf(x)
 	#elif defined(__GNUC__) && defined(__CYGWIN__)
 		#define EA_HAVE_ISNAN(x)  __isnand(x)        /* declared nowhere, it seems. */
 		#define EA_HAVE_ISINF(x)  __isinfd(x)
-	#else /* Most GCC, EDG, and Dinkumware. */
-		#define EA_HAVE_ISNAN(x)  isnan(x)           /* declared in <math.h> */
-		#define EA_HAVE_ISINF(x)  isinf(x)
+	#else
+		#define EA_HAVE_ISNAN(x)  std::isnan(x)      /* declared in <cmath> */
+		#define EA_HAVE_ISINF(x)  std::isinf(x)
 	#endif
 #endif
 
@@ -580,7 +592,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if !defined(EA_HAVE_nanosleep_DECL) && !defined(EA_NO_HAVE_nanosleep_DECL)
-	#if (defined(CS_UNDEFINED_STRING) && !defined(EA_PLATFORM_SONY)) || defined(CS_UNDEFINED_STRING) || defined(CS_UNDEFINED_STRING) || defined(EA_PLATFORM_KETTLE)
+	#if (defined(EA_PLATFORM_UNIX) && !defined(EA_PLATFORM_SONY)) || defined(EA_PLATFORM_IPHONE) || defined(EA_PLATFORM_OSX) || defined(EA_PLATFORM_SONY) || defined(EA_PLATFORM_NX)
 		#define EA_HAVE_nanosleep_DECL 1
 	#else
 		#define EA_NO_HAVE_nanosleep_DECL 1
@@ -590,6 +602,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if !defined(EA_HAVE_utime_DECL) && !defined(EA_NO_HAVE_utime_DECL)
 	#if defined(EA_PLATFORM_MICROSOFT)
 		#define EA_HAVE_utime_DECL _utime
+	#elif EA_PLATFORM_UNIX
+		#define EA_HAVE_utime_DECL utime
 	#else
 		#define EA_NO_HAVE_utime_DECL 1
 	#endif
@@ -608,7 +622,11 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if !defined(EA_HAVE_pthread_getattr_np_DECL) && !defined(EA_NO_HAVE_pthread_getattr_np_DECL)
+	#if defined(EA_PLATFORM_LINUX)
+		#define EA_HAVE_pthread_getattr_np_DECL 1
+	#else
 		#define EA_NO_HAVE_pthread_getattr_np_DECL 1
+	#endif
 #endif
 
 
@@ -616,7 +634,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* EA_HAVE_XXX_IMPL*/
 
 #if !defined(EA_HAVE_WCHAR_IMPL) && !defined(EA_NO_HAVE_WCHAR_IMPL)
-	#if defined(EA_PLATFORM_DESKTOP) || defined(CS_UNDEFINED_STRING) || defined(CS_UNDEFINED_STRING) /* To do: which others? */
+	#if defined(EA_PLATFORM_DESKTOP)
 		#define EA_HAVE_WCHAR_IMPL 1      /* Specifies if wchar_t string functions are provided, such as wcslen, wprintf, etc. Implies EA_HAVE_WCHAR_H */
 	#else
 		#define EA_NO_HAVE_WCHAR_IMPL 1
@@ -624,7 +642,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if !defined(EA_HAVE_getenv_IMPL) && !defined(EA_NO_HAVE_getenv_IMPL)
-	#if (defined(EA_PLATFORM_DESKTOP) || defined(CS_UNDEFINED_STRING)) && !defined(EA_PLATFORM_WINRT)
+	#if (defined(EA_PLATFORM_DESKTOP) || defined(EA_PLATFORM_UNIX)) && !defined(EA_PLATFORM_WINRT)
 		#define EA_HAVE_getenv_IMPL 1
 	#else
 		#define EA_NO_HAVE_getenv_IMPL 1
@@ -632,15 +650,23 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if !defined(EA_HAVE_setenv_IMPL) && !defined(EA_NO_HAVE_setenv_IMPL)
+	#if defined(EA_PLATFORM_UNIX) && defined(EA_PLATFORM_POSIX)
+		#define EA_HAVE_setenv_IMPL 1
+	#else
 		#define EA_NO_HAVE_setenv_IMPL 1
+	#endif
 #endif
 
 #if !defined(EA_HAVE_unsetenv_IMPL) && !defined(EA_NO_HAVE_unsetenv_IMPL)
+	#if defined(EA_PLATFORM_UNIX) && defined(EA_PLATFORM_POSIX)
+		#define EA_HAVE_unsetenv_IMPL 1
+	#else
 		#define EA_NO_HAVE_unsetenv_IMPL 1
+	#endif
 #endif
 
 #if !defined(EA_HAVE_putenv_IMPL) && !defined(EA_NO_HAVE_putenv_IMPL)
-	#if (defined(EA_PLATFORM_DESKTOP) || defined(CS_UNDEFINED_STRING)) && !defined(EA_PLATFORM_WINRT)
+	#if (defined(EA_PLATFORM_DESKTOP) || defined(EA_PLATFORM_UNIX)) && !defined(EA_PLATFORM_WINRT)
 		#define EA_HAVE_putenv_IMPL 1        /* With Microsoft compilers you may need to use _putenv, as they have deprecated putenv. */
 	#else
 		#define EA_NO_HAVE_putenv_IMPL 1
@@ -648,8 +674,12 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if !defined(EA_HAVE_time_IMPL) && !defined(EA_NO_HAVE_time_IMPL)
+	#if defined(EA_PLATFORM_NX)
+		#define EA_NO_HAVE_time_IMPL 1
+	#else
 		#define EA_HAVE_time_IMPL 1
 		#define EA_HAVE_clock_IMPL 1
+	#endif
 #endif
 
 // <cstdio> fopen()
@@ -659,7 +689,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // <arpa/inet.h> inet_ntop()
 #if !defined(EA_HAVE_inet_ntop_IMPL) && !defined(EA_NO_HAVE_inet_ntop_IMPL)
-	#if (defined(CS_UNDEFINED_STRING) || defined(EA_PLATFORM_POSIX)) && !defined(EA_PLATFORM_SONY) // Sony uses sceNetInetNtop instead.
+	#if (defined(EA_PLATFORM_UNIX) || defined(EA_PLATFORM_POSIX)) && !defined(EA_PLATFORM_SONY) && !defined(EA_PLATFORM_NX) 
 		#define EA_HAVE_inet_ntop_IMPL 1  /* This doesn't identify if the platform SDK has some alternative function that does the same thing; */
 		#define EA_HAVE_inet_pton_IMPL 1  /* it identifies strictly the <arpa/inet.h> inet_ntop and inet_pton functions. For example, Microsoft has InetNtop in <Ws2tcpip.h> */
 	#else
@@ -670,7 +700,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // <time.h> clock_gettime()
 #if !defined(EA_HAVE_clock_gettime_IMPL) && !defined(EA_NO_HAVE_clock_gettime_IMPL)
-	#if defined(CS_UNDEFINED_STRING) || defined(__CYGWIN__) || (defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0)) || (defined(EA_PLATFORM_POSIX) && defined(_YVALS) /*Dinkumware*/)
+	#if defined(EA_PLATFORM_LINUX) || defined(__CYGWIN__) || (defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0)) || (defined(EA_PLATFORM_POSIX) && defined(_CPPLIB_VER) /*Dinkumware*/)
 		#define EA_HAVE_clock_gettime_IMPL 1 /* You need to link the 'rt' library to get this */
 	#else
 		#define EA_NO_HAVE_clock_gettime_IMPL 1
@@ -678,7 +708,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if !defined(EA_HAVE_getcwd_IMPL) && !defined(EA_NO_HAVE_getcwd_IMPL)
-	#if (defined(EA_PLATFORM_DESKTOP) || defined(CS_UNDEFINED_STRING)) && !defined(CS_UNDEFINED_STRING) && !defined(EA_PLATFORM_WINRT)
+	#if (defined(EA_PLATFORM_DESKTOP) || defined(EA_PLATFORM_UNIX)) && !defined(EA_PLATFORM_ANDROID) && !defined(EA_PLATFORM_WINRT)
 		#define EA_HAVE_getcwd_IMPL 1       /* With Microsoft compilers you may need to use _getcwd, as they have deprecated getcwd. And in any case it's present at <direct.h> */
 	#else
 		#define EA_NO_HAVE_getcwd_IMPL 1
@@ -686,7 +716,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if !defined(EA_HAVE_tmpnam_IMPL) && !defined(EA_NO_HAVE_tmpnam_IMPL)
-	#if (defined(EA_PLATFORM_DESKTOP) || defined(CS_UNDEFINED_STRING)) && !defined(CS_UNDEFINED_STRING)
+	#if (defined(EA_PLATFORM_DESKTOP) || defined(EA_PLATFORM_UNIX)) && !defined(EA_PLATFORM_ANDROID)
 		#define EA_HAVE_tmpnam_IMPL 1
 	#else
 		#define EA_NO_HAVE_tmpnam_IMPL 1
@@ -731,7 +761,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		#elif defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4006)
 			#define EA_HAVE_nullptr_t_IMPL 1
 
-		// The Sony SNC compiler uses an EDG that provides nullptr, but uses an older standard library that doesn't support std::nullptr_t.
+		// The EDG compiler provides nullptr, but uses an older standard library that doesn't support std::nullptr_t.
 		#elif defined(__EDG_VERSION__) && (__EDG_VERSION__ >= 403) 
 			#define EA_HAVE_nullptr_t_IMPL 1
 			
@@ -745,12 +775,16 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // <exception> std::terminate
 #if !defined(EA_HAVE_std_terminate_IMPL) && !defined(EA_NO_HAVE_std_terminate_IMPL)
+	#if !defined(EA_PLATFORM_IPHONE) && !defined(EA_PLATFORM_ANDROID)
 		#define EA_HAVE_std_terminate_IMPL 1 /* iOS doesn't appear to provide an implementation for std::terminate under the armv6 target. */
+	#else
+		#define EA_NO_HAVE_std_terminate_IMPL 1
+	#endif
 #endif
 
 // <iterator>: std::begin, std::end, std::prev, std::next, std::move_iterator.
 #if !defined(EA_HAVE_CPP11_ITERATOR_IMPL) && !defined(EA_NO_HAVE_CPP11_ITERATOR_IMPL)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !defined(CS_UNDEFINED_STRING) && !(defined(_HAS_CPP0X) || _HAS_CPP0X) // Dinkumware. VS2010+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !(defined(_HAS_CPP0X) && _HAS_CPP0X) // Dinkumware. VS2010+
 		#define EA_HAVE_CPP11_ITERATOR_IMPL 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4006)
 		#define EA_HAVE_CPP11_ITERATOR_IMPL 1
@@ -763,7 +797,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // <memory>: std::weak_ptr, std::shared_ptr, std::unique_ptr, std::bad_weak_ptr, std::owner_less
 #if !defined(EA_HAVE_CPP11_SMART_POINTER_IMPL) && !defined(EA_NO_HAVE_CPP11_SMART_POINTER_IMPL)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !defined(CS_UNDEFINED_STRING) && !(defined(_HAS_CPP0X) || _HAS_CPP0X) // Dinkumware. VS2010+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !(defined(_HAS_CPP0X) && _HAS_CPP0X) // Dinkumware. VS2010+
 		#define EA_HAVE_CPP11_SMART_POINTER_IMPL 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4004)
 		#define EA_HAVE_CPP11_SMART_POINTER_IMPL 1
@@ -776,7 +810,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // <functional>: std::function, std::mem_fn, std::bad_function_call, std::is_bind_expression, std::is_placeholder, std::reference_wrapper, std::hash, std::bind, std::ref, std::cref.
 #if !defined(EA_HAVE_CPP11_FUNCTIONAL_IMPL) && !defined(EA_NO_HAVE_CPP11_FUNCTIONAL_IMPL)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !defined(CS_UNDEFINED_STRING) && !(defined(_HAS_CPP0X) || _HAS_CPP0X) // Dinkumware. VS2010+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !(defined(_HAS_CPP0X) && _HAS_CPP0X) // Dinkumware. VS2010+
 		#define EA_HAVE_CPP11_FUNCTIONAL_IMPL 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4004)
 		#define EA_HAVE_CPP11_FUNCTIONAL_IMPL 1
@@ -789,7 +823,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // <exception> std::current_exception, std::rethrow_exception, std::exception_ptr, std::make_exception_ptr
 #if !defined(EA_HAVE_CPP11_EXCEPTION_IMPL) && !defined(EA_NO_HAVE_CPP11_EXCEPTION_IMPL)
-	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !defined(CS_UNDEFINED_STRING) && !(defined(_HAS_CPP0X) || _HAS_CPP0X) // Dinkumware. VS2010+
+	#if defined(EA_HAVE_DINKUMWARE_CPP_LIBRARY) && (_CPPLIB_VER >= 520) && !(defined(_HAS_CPP0X) && _HAS_CPP0X) // Dinkumware. VS2010+
 		#define EA_HAVE_CPP11_EXCEPTION_IMPL 1
 	#elif defined(EA_COMPILER_CPP11_ENABLED) && defined(EA_HAVE_LIBSTDCPP_LIBRARY) && defined(EA_COMPILER_GNUC) && (EA_COMPILER_VERSION >= 4004)
 		#define EA_HAVE_CPP11_EXCEPTION_IMPL 1
