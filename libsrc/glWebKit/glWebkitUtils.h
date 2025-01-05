@@ -2,12 +2,12 @@
 
 #include <string>
 #include <vector>
-#include <EAWebKit\EAWebKit.h>
+#include <EAWebKit/EAWebKit.h>
 
 extern unsigned int frame;
 
-#include <EAWebKit\EAWebKit.h>
-#include <EAWebKit\EAWebKitView.h>
+#include <EAWebKit/EAWebKit.h>
+#include <EAWebKit/EAWebKitView.h>
 
 #include <string>
 

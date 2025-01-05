@@ -5,7 +5,7 @@
 #include "glWebkitThreading.h"
 #include "glWebkitClient.h"
 
-#include <EAWebKit\EAWebKit>
+#include <EAWebKit/EAWebKit>
 
 #include <windows.h>
 #include <bcrypt.h>

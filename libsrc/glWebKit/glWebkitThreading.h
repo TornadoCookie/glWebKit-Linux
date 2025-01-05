@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "EAWebKit\EAWebKitThreadInterface.h"
+#include "EAWebKit/EAWebKitThreadInterface.h"
 
 #include <thread>
 #include <mutex>

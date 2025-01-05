@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EAWebKit\EAWebKitClient.h>
+#include <EAWebKit/EAWebKitClient.h>
 
 class GLWebkitClient : public EA::WebKit::EAWebKitClient
 {

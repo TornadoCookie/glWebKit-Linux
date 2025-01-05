@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include <EAWebKit\EAWebKitSurface.h>
-#include <EAWebKit\EAWebKitHardwareRenderer.h>
+#include <EAWebKit/EAWebKitSurface.h>
+#include <EAWebKit/EAWebKitHardwareRenderer.h>
 
 #include <cstdint>
 
