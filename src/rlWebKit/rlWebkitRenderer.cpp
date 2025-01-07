@@ -1,5 +1,5 @@
 
-#include "glWebkitRenderer.h"
+#include "rlWebkitRenderer.h"
 
 #include <EAWebKit/EAWebKit.h>
 #include <EAWebKit/EAWebkitAllocator.h>

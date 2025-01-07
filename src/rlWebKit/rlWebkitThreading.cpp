@@ -1,5 +1,5 @@
 
-#include "glWebkitThreading.h"
+#include "rlWebkitThreading.h"
 #include <sstream>
 
 #if defined(GLWEBKIT_PLATFORM_WINDOWS)

@@ -1,9 +1,9 @@
-#include "glWebKit/glWebKit.h"
+#include "rlWebKit/rlWebKit.h"
 
-#include "glWebkitUtils.h"
-#include "glWebkitRenderer.h"
-#include "glWebkitThreading.h"
-#include "glWebkitClient.h"
+#include "rlWebkitUtils.h"
+#include "rlWebkitRenderer.h"
+#include "rlWebkitThreading.h"
+#include "rlWebkitClient.h"
 
 #include <EAWebKit/EAWebKit>
 
@@ -217,7 +217,7 @@ bool initWebkit()
 
    wk->SetParameters(params);
 
-   NetConnStartup("-servicename=glWebKit");
+   NetConnStartup("-servicename=rlWebKit");
 
    //should be pulling these from the OS by their family type
    //times new roman is the default fallback if a font isn't found, so we need 

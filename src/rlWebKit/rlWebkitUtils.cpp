@@ -1,6 +1,6 @@
-#include "glWebKit/glWebKit.h"
+#include "rlWebKit/rlWebKit.h"
 
-#include "glWebkitUtils.h"
+#include "rlWebkitUtils.h"
 
 #include <GL/glew.h>
 
