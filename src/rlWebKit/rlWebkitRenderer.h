@@ -6,13 +6,13 @@
 
 #include <cstdint>
 
-class GLSurface : public EA::WebKit::ISurface
+class RLSurface : public EA::WebKit::ISurface
 {
 public:
    unsigned int tex = 0;
 public:
-   GLSurface();
-   virtual ~GLSurface();
+   RLSurface();
+   virtual ~RLSurface();
    virtual void Lock(SurfaceDescriptor *pSDOut, const EA::WebKit::IntRect *rect = NULL) override;
    virtual void Unlock(void) override;
    virtual void Release(void) override;
@@ -22,11 +22,11 @@ protected:
    virtual void AllocateSurface(int width, int height) override;
 };
 
-class GLRenderer : public EA::WebKit::IHardwareRenderer
+class RLRenderer : public EA::WebKit::IHardwareRenderer
 {
 public:
-   GLRenderer();
-   virtual ~GLRenderer();
+   RLRenderer();
+   virtual ~RLRenderer();
    virtual EA::WebKit::ISurface * CreateSurface(EA::WebKit::SurfaceType surfaceType, const void* data = 0, size_t length = 0) override;
    virtual void SetRenderTarget(EA::WebKit::ISurface *target) override;
    virtual void RenderSurface(EA::WebKit::ISurface *surface, EA::WebKit::FloatRect &target, EA::WebKit::TransformationMatrix &matrix, float opacity, EA::WebKit::CompositOperator op, EA::WebKit::TextureWrapMode wrap, EA::WebKit::Filters &filters) override;

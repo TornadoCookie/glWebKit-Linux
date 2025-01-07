@@ -2,7 +2,8 @@
 
 #include "rlWebkitUtils.h"
 
-#include <GL/glew.h>
+#include "glad.h"
+//#include <GL/glew.h>
 
 #include <EAWebKit/EAWebKit.h>
 #include <EAWebKit/EAWebkitAllocator.h>

@@ -103,9 +103,7 @@ CFLAGS+=-D PLATFORM=\"$(PLATFORM)\"
 CFLAGS+=-Wno-changes-meaning
 CFLAGS+=-fPIC
 
-LDFLAGS+=-lSDL2
 LDFLAGS+=-lGLEW
-LDFLAGS+=-lGL
 
 CFLAGS+=-Ilib/$(RAYLIB_NAME)/include
 
@@ -128,7 +126,6 @@ $(DISTDIR)/librlWebKit$(LIB_EXTENSION): $(librlWebKit_SOURCES) $(librlWebKit_CXX
 $(DISTDIR)/librlWebKit$(LIB_EXTENSION_STATIC): $(librlWebKit_SOURCES) $(librlWebKit_CXX_SOURCES)
 	$(AR) rcs $@ $^
 
-example_CXX_SOURCES+=$(DISTDIR)/src/example/glUtil.o
 example_CXX_SOURCES+=$(DISTDIR)/src/example/main.o
 
 $(DISTDIR)/example$(EXEC_EXTENSION): $(example_SOURCES) $(example_CXX_SOURCES)
@@ -147,7 +144,6 @@ clean:
 	rm -f $(DISTDIR)/src/rlWebKit/rlWebkitThreading.o
 	rm -f $(DISTDIR)/src/rlWebKit/rlWebkitUtils.o
 	rm -f $(DISTDIR)/librlWebKit$(EXEC_EXTENSION)
-	rm -f $(DISTDIR)/src/example/glUtil.o
 	rm -f $(DISTDIR)/src/example/main.o
 	rm -f $(DISTDIR)/example$(EXEC_EXTENSION)
 

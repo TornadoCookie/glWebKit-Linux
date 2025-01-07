@@ -3,20 +3,11 @@
 #include "windows.h"
 #endif
 
-#define SDL_MAIN_HANDLED
-#include "SDL2/SDL.h"
-
-#include <GL/glew.h>
-
-#include "glm/glm.hpp"
-#include "glm/matrix.hpp"
-#include "glm/trigonometric.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include <glm/gtc/type_ptr.hpp>
-
+#include <raylib.h>
+#include <raymath.h>
 #include "rlWebKit/rlWebKit.h"
 
-#include "glUtil.h"
+//#include "glUtil.h"
 
 #include <vector>
 #include <iostream>
@@ -27,11 +18,9 @@
 const int SCREEN_WIDTH = 1280;
 const int SCREEN_HEIGHT = 720;
 
-//The window we'll be rendering to
-SDL_Window* gWindow = NULL;
-
 EA::WebKit::View* v;
 
+/*
 //OpenGL context
 SDL_GLContext gContext;
 DrawCall screenQuad;
@@ -241,7 +230,7 @@ void drawInterface(EA::WebKit::View* v)
    glBindVertexArray(screenQuad.myVao);
    glDrawElements(GL_TRIANGLES, screenQuad.indexCount, GL_UNSIGNED_SHORT, 0);
 }
-
+*/
 int main(int argc, char** argv, char **envp)
 {
    void SDL_SetMainReady(void);
@@ -258,102 +247,88 @@ const char* display_env = getenv("DISPLAY");
         printf("DISPLAY is set to: %s\n", display_env);
     }
 
-   //Initialize SDL
-   if(SDL_Init(SDL_INIT_VIDEO) < 0)
-   {
-      std::cout << "SDL could not initialize! SDL_Error:" << SDL_GetError() << std::endl;;
-      return 0;
-   }
-
-   //Use OpenGL 4.5 core
-   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
-   //Create window
-   gWindow = SDL_CreateWindow("Webkit Test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
-   gContext = SDL_GL_CreateContext(gWindow);
-   if(SDL_GL_SetSwapInterval(0) < 0)
-   {
-      std::cout << "Warning: Unable to set VSync! SDL Error: " << SDL_GetError() << std::endl;
-   }
+   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Webkit Test");
 
    //Main loop flag
    bool quit = false;
 
    //Event handler
-   SDL_Event e;
 
    //initialization
-   initGL();
-   initScreenQuad();
-   initCube();
+   //initGL();
+   //initScreenQuad();
+   //initCube();
    initWebkit();
+
+   Image img = GenImageColor(SCREEN_WIDTH, SCREEN_HEIGHT, BLANK);
+   Texture2D screenTex = LoadTextureFromImage(img);
+
+   UnloadImage(img);
 
    //create the web view
    v = createView(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+   SetTargetFPS(60);
 
    std::string url(argv[1]); //std::string("file:///") + SDL_GetBasePath() + "/UI/actionMenu.html";
    std::cout << "navigating to " << url << '\n';
    setViewUrl(v, url.c_str());
 
-   //While application is running
-   while(!quit)
-   {
       //Handle events on queue
-      while(SDL_PollEvent(&e) != 0)
+      while(!WindowShouldClose())
       {
-         //User requests quit
-         if(e.type == SDL_QUIT)
+
+         if (IsKeyPressed(KEY_F5))
          {
-            quit = true;
+             reload(v);
          }
 
-         if(e.type == SDL_KEYUP)
-         {
-            if(e.key.keysym.sym == SDLK_ESCAPE)
-            {
-               quit == true;
-            }
+        mousemove(v, GetMouseDelta().x, GetMouseDelta().y);
 
-            if(e.key.keysym.sym == SDLK_F5)
-            {
-               reload(v);
-            }
+         int mouseButtonPressed = -1;
+         bool mouseButtonState;
+
+        // kMouseLeft = 0
+        // kMouseMiddle = 1
+        // kMouseRight = 2
+
+         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+         {
+             mouseButtonPressed = 0;
+             mouseButtonState = true;
+         }
+         else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+         {
+             mouseButtonPressed = 0;
+             mouseButtonState = false;
          }
 
-         if(e.type == SDL_MOUSEMOTION)
+         if (mouseButtonPressed != -1)
          {
-            mousemove(v, e.motion.x, e.motion.y);
+             mousebutton(v, GetMouseX(), GetMouseY(), mouseButtonPressed, mouseButtonState);
          }
 
-         if(e.type == SDL_MOUSEBUTTONUP || e.type == SDL_MOUSEBUTTONDOWN)
-         {
-            mousebutton(v, e.button.x, e.button.y, e.button.button, e.button.state);
-         }
-      }
+      BeginDrawing();
+      ClearBackground(RAYWHITE);
 
       //update the things
       updateWebkit();
       updateView(v);
+
+      updateGLTexture(v, screenTex.id);
+      DrawTexture(screenTex, 0, 0, WHITE);
      
       //draw the things
-      drawCube();
-      drawInterface(v);      
+      //drawCube();
+      //drawInterface(v);      
 
       //Update screen
-      SDL_GL_SwapWindow(gWindow);
+      EndDrawing();
    }
 
    //cleanup Webkit
    destroyView(v);
    shutdownWebKit();
-
-   //Destroy window
-   SDL_DestroyWindow(gWindow);
-
-   //Quit SDL subsystems
-   SDL_Quit();
 
    return 0;
 }

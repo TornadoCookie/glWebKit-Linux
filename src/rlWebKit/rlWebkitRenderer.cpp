@@ -12,19 +12,19 @@
 #include <array>
 #include <iostream>
 
-GLRenderer::GLRenderer()
+RLRenderer::RLRenderer()
 {
 
 }
 
-GLRenderer::~GLRenderer()
+RLRenderer::~RLRenderer()
 {
 
 }
 
-EA::WebKit::ISurface * GLRenderer::CreateSurface(EA::WebKit::SurfaceType surfaceType, const void* data /*= 0*/, size_t length /*= 0*/)
+EA::WebKit::ISurface * RLRenderer::CreateSurface(EA::WebKit::SurfaceType surfaceType, const void* data /*= 0*/, size_t length /*= 0*/)
 {
-    GLSurface* res = new GLSurface();
+    RLSurface* res = new RLSurface();
     if (data && length)
     {
         EA::WebKit::ISurface::SurfaceDescriptor sd = {};
@@ -35,77 +35,77 @@ EA::WebKit::ISurface * GLRenderer::CreateSurface(EA::WebKit::SurfaceType surface
     return res;
 }
 
-void GLRenderer::SetRenderTarget(EA::WebKit::ISurface *target)
+void RLRenderer::SetRenderTarget(EA::WebKit::ISurface *target)
 {
     std::cout << __FUNCTION__ << std::endl;
 }
 
-void GLRenderer::RenderSurface(EA::WebKit::ISurface *surface, EA::WebKit::FloatRect &target, EA::WebKit::TransformationMatrix &matrix, float opacity, EA::WebKit::CompositOperator op, EA::WebKit::TextureWrapMode wrap, EA::WebKit::Filters &filters)
+void RLRenderer::RenderSurface(EA::WebKit::ISurface *surface, EA::WebKit::FloatRect &target, EA::WebKit::TransformationMatrix &matrix, float opacity, EA::WebKit::CompositOperator op, EA::WebKit::TextureWrapMode wrap, EA::WebKit::Filters &filters)
 {
    std::cout << __FUNCTION__ << std::endl;
 }
 
-void GLRenderer::FillColor(uint32_t premultiplied_rgba32, EA::WebKit::FloatRect &target, EA::WebKit::TransformationMatrix &matrix, EA::WebKit::CompositOperator op)
+void RLRenderer::FillColor(uint32_t premultiplied_rgba32, EA::WebKit::FloatRect &target, EA::WebKit::TransformationMatrix &matrix, EA::WebKit::CompositOperator op)
 {
     std::cout << __FUNCTION__ << std::endl;
 }
 
-void GLRenderer::DrawOutline(uint32_t premultiplied_rgba32, EA::WebKit::FloatRect &target, EA::WebKit::TransformationMatrix &matrix)
+void RLRenderer::DrawOutline(uint32_t premultiplied_rgba32, EA::WebKit::FloatRect &target, EA::WebKit::TransformationMatrix &matrix)
 {
     std::cout << __FUNCTION__ << std::endl;
 }
 
-int32_t GLRenderer::MaxTextureSize(void)
+int32_t RLRenderer::MaxTextureSize(void)
 {
     return 4096;
 }
 
-void GLRenderer::Clear(EA::WebKit::ClearFlags flags, uint32_t premultiplied_rgba32, float z, uint32_t stencil)
+void RLRenderer::Clear(EA::WebKit::ClearFlags flags, uint32_t premultiplied_rgba32, float z, uint32_t stencil)
 {
     std::cout << __FUNCTION__ << std::endl;
 }
 
-void GLRenderer::ScissorClip(EA::WebKit::IntRect axisAlignedRect)
+void RLRenderer::ScissorClip(EA::WebKit::IntRect axisAlignedRect)
 {
     std::cout << __FUNCTION__ << std::endl;
 }
 
-void GLRenderer::DrawStencil(EA::WebKit::TransformationMatrix &matrix, EA::WebKit::FloatRect &target, uint32_t stencilIndex)
+void RLRenderer::DrawStencil(EA::WebKit::TransformationMatrix &matrix, EA::WebKit::FloatRect &target, uint32_t stencilIndex)
 {
     std::cout << __FUNCTION__ << std::endl;
 }
 
-void GLRenderer::ClipAgainstStencil(uint32_t stencilIndex)
+void RLRenderer::ClipAgainstStencil(uint32_t stencilIndex)
 {
     std::cout << __FUNCTION__ << std::endl;
 }
 
-bool GLRenderer::UseCustomClip()
+bool RLRenderer::UseCustomClip()
 {
     return false;
 }
 
-void GLRenderer::BeginClip(EA::WebKit::TransformationMatrix &matrix, EA::WebKit::FloatRect &target)
+void RLRenderer::BeginClip(EA::WebKit::TransformationMatrix &matrix, EA::WebKit::FloatRect &target)
 {
     std::cout << __FUNCTION__ << std::endl;
 }
 
-void GLRenderer::EndClip(void)
+void RLRenderer::EndClip(void)
 {
     std::cout << __FUNCTION__ << std::endl;
 }
 
-EA::WebKit::IntRect GLRenderer::CurrentClipBound()
+EA::WebKit::IntRect RLRenderer::CurrentClipBound()
 {
     return EA::WebKit::IntRect(0, 0, 800, 600);
 }
 
-void GLRenderer::BeginPainting(void)
+void RLRenderer::BeginPainting(void)
 {
    std::cout << __FUNCTION__ << std::endl;
 }
 
-void GLRenderer::EndPainting(void)
+void RLRenderer::EndPainting(void)
 {
     std::cout << __FUNCTION__ << std::endl;
 }
@@ -115,42 +115,42 @@ void GLRenderer::EndPainting(void)
 //------------------------GL Surface ------------------------------------
 
 
-GLSurface::GLSurface()
+RLSurface::RLSurface()
 {
 
 }
 
-GLSurface::~GLSurface()
+RLSurface::~RLSurface()
 {
 
 }
 
-void GLSurface::Lock(SurfaceDescriptor *pSDOut, const EA::WebKit::IntRect *rect /*= NULL*/)
+void RLSurface::Lock(SurfaceDescriptor *pSDOut, const EA::WebKit::IntRect *rect /*= NULL*/)
 {
 
 }
 
-void GLSurface::Unlock(void)
+void RLSurface::Unlock(void)
 {
 
 }
 
-void GLSurface::Release(void)
+void RLSurface::Release(void)
 {
 
 }
 
-bool GLSurface::IsAllocated(void) const
+bool RLSurface::IsAllocated(void) const
 {
    return false;
 }
 
-void GLSurface::Reset(void)
+void RLSurface::Reset(void)
 {
     // no idea what this is supposed to do
 }
 
-void GLSurface::AllocateSurface(int width, int height)
+void RLSurface::AllocateSurface(int width, int height)
 {
  
 }
