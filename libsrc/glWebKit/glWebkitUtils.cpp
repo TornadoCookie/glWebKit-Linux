@@ -16,8 +16,7 @@
 #if defined(GLWEBKIT_PLATFORM_WINDOWS)
 #include <windows.h> // LoadLibraryA
 #elif defined(GLWEBKIT_PLATFORM_LINUX)
-#include <X11/Xlib.h>
-#include <climits>
+#include <dirent.h>
 #define index _index // avoid name collision with deprecated POSIX func
 #endif
 
@@ -98,21 +97,34 @@ int getSystemFonts(std::vector<std::string>& fonts)
 
 #elif defined(GLWEBKIT_PLATFORM_LINUX)
 
-// use XListFonts perhaps?
-
 int getSystemFonts(std::vector<std::string>& fonts) 
 {
-    Display *dpy = XOpenDisplay(NULL);
+    struct dirent *dp;
+    DIR *fontDir = opendir("/usr/share/fonts/truetype");
 
-    int fontCount = 0;
-    char **fontList = XListFonts(dpy, "*", INT_MAX, &fontCount);
-
-    for (int i = 0; i < fontCount; i++)
+    if (!fontDir)
     {
-        fonts.push_back(std::string(fontList[i]));
+        perror("/usr/share/fonts/truetype");
+        return 1;
     }
 
-    XCloseDisplay(dpy);
+    while ((dp = readdir(fontDir)) != NULL)
+    {
+        DIR *familyDir = opendir(dp->d_name);
+        struct dirent *fdp;
+
+        if (!familyDir) { perror("warning"); continue;}
+
+        while ((fdp = readdir(familyDir)) != NULL)
+        {
+            std::cout << fdp->d_name << '\n';
+            fonts.push_back(fdp->d_name);
+        }
+
+        closedir(familyDir);
+    }
+
+    closedir(fontDir);
 
     return 0;
 }
