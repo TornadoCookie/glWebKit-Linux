@@ -274,6 +274,12 @@ const char* display_env = getenv("DISPLAY");
    std::cout << "navigating to " << url << '\n';
    setViewUrl(v, url.c_str());
 
+   Camera camera = {0};
+   camera.position = (Vector3){10, 10, 0};
+   camera.target = (Vector3){0, 0, 0};
+   camera.fovy = 70;
+   camera.up = (Vector3){0, 1, 0};
+
       //Handle events on queue
       while(!WindowShouldClose())
       {
@@ -308,8 +314,18 @@ const char* display_env = getenv("DISPLAY");
              mousebutton(v, GetMouseX(), GetMouseY(), mouseButtonPressed, mouseButtonState);
          }
 
+         mousewheel(v, GetMouseX(), GetMouseY(), 0, GetMouseWheelMove()*60);
+
+         UpdateCamera(&camera, CAMERA_ORBITAL);
+
       BeginDrawing();
       ClearBackground(RAYWHITE);
+
+      BeginMode3D(camera);
+
+      DrawCubeWires((Vector3){0, 0, 0}, 1, 1, 1, RED);
+
+      EndMode3D();
 
       //update the things
       updateWebkit();
