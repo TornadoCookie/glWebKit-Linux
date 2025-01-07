@@ -7,6 +7,8 @@
 
 #include <EAWebKit/EAWebKit>
 
+#include <DirtySDK/dirtysock/netconn.h>
+
 #if defined(GLWEBKIT_PLATFORM_WINDOWS)
 #include <windows.h>
 #include <bcrypt.h>
@@ -163,7 +165,7 @@ bool setCookieCallback(const EA::WebKit::CookieEx& cookie)
 struct EA::WebKit::AppCallbacks callbacks = {
    timerCallback,
    monotonicTimerCallback,
-   stackBaseCallback,
+   NULL,//stackBaseCallback,
    cryptographicallyRandomValueCallback,
    getCookiesCallback,
    setCookieCallback
@@ -183,6 +185,7 @@ bool initWebkit()
    // init winsock manually, this is required
    WSADATA wsadata = {};
    WSAStartup(MAKEWORD(2, 0), &wsadata);
+
 #endif
 
    if (!create_Webkit_instance)
@@ -213,6 +216,8 @@ bool initWebkit()
    params.mJavaScriptStackSize = 1024 * 1024; //1MB of stack space
 
    wk->SetParameters(params);
+
+   NetConnStartup("-servicename=glWebKit");
 
    //should be pulling these from the OS by their family type
    //times new roman is the default fallback if a font isn't found, so we need 
