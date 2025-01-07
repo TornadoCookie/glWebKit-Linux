@@ -1,2 +1,2 @@
-# glWebKit
-EAWebKit example using OpenGL and SDL
+# rlWebKit
+EAWebKit example using Raylib 5.5

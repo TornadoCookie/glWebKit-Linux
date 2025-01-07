@@ -1,0 +1,27 @@
+DefaultDistDir build
+DefaultPlatform linux64-debug
+UseRaylib True
+
+NativeDependency EAWebKitd
+NativeDependency rlWebKit
+
+ExtraLDFlag -lSDL2
+ExtraLDFlag -lGLEW
+ExtraLDFlag -lGL
+
+ExtraCFlag -Wno-changes-meaning
+ExtraCFlag -fPIC
+
+Library librlWebKit
+CxxSource rlWebKit/rlWebKit.cpp
+CxxSource rlWebKit/rlWebkitClient.cpp
+CxxSource rlWebKit/rlWebkitRenderer.cpp
+CxxSource rlWebKit/rlWebkitThreading.cpp
+CxxSource rlWebKit/rlWebkitUtils.cpp
+
+Program example
+CxxSource example/glUtil.cpp
+CxxSource example/main.cpp
+
+
+
