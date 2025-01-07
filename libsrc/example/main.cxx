@@ -4,7 +4,7 @@
 #endif
 
 #define SDL_MAIN_HANDLED
-#include "SDL/SDL.h"
+#include "SDL2/SDL.h"
 
 #include <GL/glew.h>
 
@@ -242,9 +242,21 @@ void drawInterface(EA::WebKit::View* v)
    glDrawElements(GL_TRIANGLES, screenQuad.indexCount, GL_UNSIGNED_SHORT, 0);
 }
 
-int main(int argc, char** argv)
+int main(int argc, char** argv, char **envp)
 {
    void SDL_SetMainReady(void);
+
+//   for (int i = 0; envp[i] != NULL; i++)
+//   {
+//       printf("envp[%d]=%s\n",i,envp[i]);
+//   }
+
+const char* display_env = getenv("DISPLAY");
+    if (display_env == NULL) {
+        printf("DISPLAY is not set or accessible.\n");
+    } else {
+        printf("DISPLAY is set to: %s\n", display_env);
+    }
 
    //Initialize SDL
    if(SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -281,7 +293,8 @@ int main(int argc, char** argv)
    //create the web view
    v = createView(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-   std::string url = std::string("file:///") + SDL_GetBasePath() + "/UI/actionMenu.html";
+   std::string url(argv[1]); //std::string("file:///") + SDL_GetBasePath() + "/UI/actionMenu.html";
+   std::cout << "navigating to " << url << '\n';
    setViewUrl(v, url.c_str());
 
    //While application is running
